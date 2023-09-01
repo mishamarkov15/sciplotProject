@@ -7,19 +7,27 @@
 #include <sciplot/sciplot.hpp>
 
 using namespace sciplot;
+typedef std::map<char, std::map<std::string, size_t>> delays_dict;
 
-// {
-//    'a': {
-//       'count': 4,
-//       'delay': 3.8ms
-//    },
-//    'b' : {
-//       'c'
-//    }
-// }
-
-std::map<char, std::map<std::string, size_t>> getDelays() {
-    std::map<char, std::map<std::string, size_t>> res;
+/**
+ * Функция, которая обрабатывает нажатия клавиш на клавиатуру и подсчитывает задержку в миллисекундах
+ * перед нажатием каждой из клавиш. Символ окончания ввода: '.'
+ *
+ * @return Словарь следующего формата
+ * {
+ *     'a': {
+ *          'count': 4,
+ *          'delay': 3.8ms
+ *      },
+ *      'b' : {
+ *          'count': 2,
+ *          'delay': 6.6ms
+ *      },
+ *      ...
+ * }
+ */
+delays_dict getDelays() {
+    delays_dict res;
 
     char sym;
     while (true) {
@@ -47,8 +55,13 @@ std::map<char, std::map<std::string, size_t>> getDelays() {
     return res;
 }
 
-// Среднее арифметическое задержек для каждой клавиши
-std::vector<double> averageDelays(const std::map<char, std::map<std::string, size_t>> &delays) {
+/**
+ * Подсчет средней задержки перед нажатием каждой из нажатых клавиш.
+ *
+ * @param delays словарь, который получается из функции `delays_dict getDelays()`
+ * @return Вектор средних задержек. Задержки расположены в том же порядке, что и символы в словаре `delays`.
+ */
+std::vector<double> averageDelays(const delays_dict &delays) {
     std::vector<double> res;
     for (const auto &item: delays) {
         res.push_back(static_cast<double>(item.second.at("delay")) / static_cast<double>(item.second.at("count")));
@@ -63,23 +76,22 @@ std::vector<double> averageDelays(const std::map<char, std::map<std::string, siz
 //
 //  На выходе получим такое
 // return: {{1000ms, 1240ms, 1500ms}, {'c', 'b', 'a'}}
-std::pair<std::vector<double>, std::vector<std::string>>
-sortDelays(const std::map<char, std::map<std::string, size_t>> &delays) {
+std::pair<std::vector<double>, std::vector<std::string>> sortDelays(const delays_dict &delays) {
     // pairs: {{1000ms, 'a'}, {5600ms, 'b'}, {689ms, 'c'}}
     auto avg = averageDelays(delays);
 
     std::vector<std::pair<double, std::string>> pairs;
     for (const auto &item: delays) {
         pairs.emplace_back(static_cast<double>(item.second.at("delay")) / static_cast<double>(item.second.at("count")),
-                         std::string(1, item.first));
+                           std::string(1, item.first));
     }
 
-    std::sort(pairs.begin(), pairs.end(), [](auto& lhs, auto& rhs) -> bool { return lhs.first < rhs.first;});
+    std::sort(pairs.begin(), pairs.end(), [](auto &lhs, auto &rhs) -> bool { return lhs.first < rhs.first; });
 
 
     std::vector<double> averageSortedDelays;
     std::vector<std::string> sortedSymbols;
-    for (const auto& pair : pairs) {
+    for (const auto &pair: pairs) {
         averageSortedDelays.push_back(pair.first);
         sortedSymbols.push_back(pair.second);
     }
@@ -87,7 +99,7 @@ sortDelays(const std::map<char, std::map<std::string, size_t>> &delays) {
 }
 
 //  Гистограмма со средней задержкой перед нажатием клавиши
-void histogramAverageDelay(const std::map<char, std::map<std::string, size_t>> &delays) {
+void histogramAverageDelay(const delays_dict &delays) {
     auto [x, y] = sortDelays(delays);
 
     Vec sizes(1.0, y.size());
@@ -95,9 +107,9 @@ void histogramAverageDelay(const std::map<char, std::map<std::string, size_t>> &
     Plot2D plot;
 
     plot.xlabel("symbol");
-    plot.ylabel("delay");
+    plot.ylabel("average delay (ms)");
 
-    plot.drawBoxes(x, y, sizes).fillSolid().fillColor("green").fillIntensity(0.9);
+    plot.drawBoxes(y, x, sizes).fillSolid().fillColor("green").fillIntensity(0.9);
 
     Figure fig{{plot}};
 
@@ -105,10 +117,12 @@ void histogramAverageDelay(const std::map<char, std::map<std::string, size_t>> &
 
     canvas.show();
 
-    canvas.save("Hist example");
+    canvas.save("Hist example.pdf");
 }
 
 int main(int argc, char **argv) {
+    std::cout << "Enter characters, separating them by enter ('.' for break)\n"
+                 "----------------------------------------------------------\n";
     auto res = getDelays();
     for (auto &item: res) {
         std::cout << item.first << ":\n";
