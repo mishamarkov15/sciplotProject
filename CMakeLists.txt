@@ -14,7 +14,7 @@ set(SOURCES main.cpp)
 set(TESTING test.cpp)
 
 # Добавляем исполняемый файл с названием sciplot_graph и исходным кодом из переменной SOURCES
-add_executable(sciplot_graph ${TESTING})
+add_executable(sciplot_graph ${SOURCES})
 
 target_link_libraries(sciplot_graph sciplot::sciplot)
 

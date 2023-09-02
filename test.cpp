@@ -34,9 +34,9 @@ bool sorted_delays_equal(const sorted_delays_type& lhs, const sorted_delays_type
  */
 TEST_CASE("sortingDelays") {
     delays_dict delays = {
-            {'a', {{"count", 5}, {"delay", 5000},}},    // avg: 1000
-            {'b', {{"count", 3}, {"delay", 1800},}},    // avg: 600
-            {'c', {{"count", 10}, {"delay", 20000},}},  // avg: 2000
+            {"a", {{"count", 5}, {"delay", 5000},}},    // avg: 1000
+            {"b", {{"count", 3}, {"delay", 1800},}},    // avg: 600
+            {"c", {{"count", 10}, {"delay", 20000},}},  // avg: 2000
     };
 
     auto sorted = sortDelays(delays);
@@ -62,11 +62,11 @@ TEST_CASE("plotDelays") {
 TEST_CASE("plotHistograms")
 {
     delays_dict delays = {
-            {'a', {{"count", 5}, {"delay", 5000},}},    // avg: 1000
-            {'b', {{"count", 3}, {"delay", 1800},}},    // avg: 600
-            {'c', {{"count", 10}, {"delay", 20000},}},  // avg: 2000
-            {'d', {{"count", 6}, {"delay", 5600},}},  // avg: 933
-            {'e', {{"count", 8}, {"delay", 12460},}},  // avg: 1560
+            {"a", {{"count", 5}, {"delay", 5000},}},    // avg: 1000
+            {"b", {{"count", 3}, {"delay", 1800},}},    // avg: 600
+            {"c", {{"count", 10}, {"delay", 20000},}},  // avg: 2000
+            {"d", {{"count", 6}, {"delay", 5600},}},  // avg: 933
+            {"e", {{"count", 8}, {"delay", 12460},}},  // avg: 1560
     };
 
     histogramAverageDelay(delays);
@@ -74,3 +74,21 @@ TEST_CASE("plotHistograms")
     CHECK(fileExists(FILEPATH_HISTOGRAM));
 }
 
+
+/**
+ * Проверка создания файла с гистограммой (пары клавиш).
+ */
+TEST_CASE("plotHistogramsPairs")
+{
+    delays_dict delays = {
+            {"ab", {{"count", 5}, {"delay", 5000},}},    // avg: 1000
+            {"bd", {{"count", 3}, {"delay", 1800},}},    // avg: 600
+            {"ce", {{"count", 10}, {"delay", 20000},}},  // avg: 2000
+            {"dd", {{"count", 6}, {"delay", 5600},}},  // avg: 933
+            {"ec", {{"count", 8}, {"delay", 12460},}},  // avg: 1560
+    };
+
+    histogramAverageDelay(delays);
+
+    CHECK(fileExists(FILEPATH_HISTOGRAM));
+}

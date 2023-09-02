@@ -8,7 +8,7 @@
 
 using namespace sciplot;
 
-typedef std::map<char, std::map<std::string, size_t>> delays_dict;
+typedef std::map<std::string, std::map<std::string, size_t>> delays_dict;
 
 typedef std::pair<std::vector<double>, std::vector<std::string>> sorted_delays_type;
 
@@ -22,11 +22,11 @@ const std::string FILEPATH_CURVE = "Curve.pdf";
  *
  * @return Словарь следующего формата
  * {
- *     'a': {
+ *     "a": {
  *          'count': 4,
  *          'delay': 3.8ms
  *      },
- *      'b' : {
+ *      "b" : {
  *          'count': 2,
  *          'delay': 6.6ms
  *      },
@@ -49,11 +49,62 @@ delays_dict getDelays() {
 
         auto delay = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-        if (res.find(sym) != res.end()) {
-            ++res[sym]["count"];
-            res[sym]["delay"] += delay;
+        std::string key(1, sym);
+
+        if (res.find(key) != res.end()) {
+            ++res[key]["count"];
+            res[key]["delay"] += delay;
         } else {
-            res[sym] = {
+            res[key] = {
+                    {"count", 1},
+                    {"delay", delay}
+            };
+        }
+    }
+    return res;
+}
+
+/**
+ * Функция, которая обрабатывает нажатия клавиш на клавиатуру и подсчитывает задержку в миллисекундах
+ * перед нажатием каждой пары клавиш. Символ окончания ввода: '.'
+ *
+ * @return Словарь следующего формата
+ * {
+ *      "ab": {
+ *          'count': 4,
+ *          'delay': 3.8ms
+ *      },
+ *      "bc" : {
+ *          'count': 2,
+ *          'delay': 6.6ms
+ *      },
+ *      ...
+ * }
+ */
+delays_dict getPairDelays() {
+    delays_dict res;
+
+    char sym_1 = '.', sym_2;
+    while (true) {
+        auto start = std::chrono::high_resolution_clock::now();
+        std::cin >> sym_1;
+        if (sym_1 == '.') break;
+
+        std::cin >> sym_2;
+        if (sym_2 == '.') break;
+        auto end = std::chrono::high_resolution_clock::now();
+
+
+
+        auto delay = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+        std::string key = std::string(1, sym_1) + std::string(1, sym_2);
+
+        if (res.find(key) != res.end()) {
+            ++res[key]["count"];
+            res[key]["delay"] += delay;
+        } else {
+            res[key] = {
                     {"count", 1},
                     {"delay", delay}
             };
@@ -120,7 +171,7 @@ sorted_delays_type sortDelays(const delays_dict &delays) {
     std::vector<std::pair<double, std::string>> pairs;
     for (const auto &item: delays) {
         pairs.emplace_back(static_cast<double>(item.second.at("delay")) / static_cast<double>(item.second.at("count")),
-                           std::string(1, item.first));
+                           item.first);
     }
 
     std::sort(pairs.begin(), pairs.end(), [](auto &lhs, auto &rhs) -> bool { return lhs.first < rhs.first; });
@@ -152,12 +203,15 @@ void histogramAverageDelay(const delays_dict &delays) {
     plot.xlabel("symbol");
     plot.ylabel("average delay (ms)");
 
-    plot.drawBoxes(y, x, sizes).fillSolid().fillColor("green").fillIntensity(0.9);
+    plot.drawBoxes(y, x, sizes).fillSolid().fillColor("blue").fillIntensity(0.6).label("Средние задержки");
+
+    plot.legend().atTopLeft(); // Устанавливаем легенду в верхнем левом углу
 
     Figure fig{{plot}};
 
     Canvas canvas{{fig}};
 
+    canvas.size(800, 600);
     canvas.show();
 
     canvas.save(FILEPATH_HISTOGRAM);
