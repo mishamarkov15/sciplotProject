@@ -11,9 +11,11 @@ find_package(sciplot)
 
 # Добавляем директорию с исходным кодом в переменную SOURCES
 set(SOURCES main.cpp)
+set(TESTING test.cpp)
 
 # Добавляем исполняемый файл с названием sciplot_graph и исходным кодом из переменной SOURCES
-add_executable(sciplot_graph ${SOURCES})
+add_executable(sciplot_graph ${TESTING})
+
 target_link_libraries(sciplot_graph sciplot::sciplot)
 
 add_subdirectory(sciplot)
