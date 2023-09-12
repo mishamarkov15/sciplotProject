@@ -21,6 +21,9 @@ inline bool fileExists(const std::string &filename) {
  * @return true, если lhs == rhs, иначе - false.
  */
 bool sorted_delays_equal(const sorted_delays_type& lhs, const sorted_delays_type& rhs) {
+    if (lhs.first.size() != rhs.first.size()) {
+        return false;
+    }
     for (size_t i = 0; i < lhs.first.size(); ++i) {
         if (lhs.first[i] != rhs.first[i] || lhs.second[i] != rhs.second[i]) {
             return false;

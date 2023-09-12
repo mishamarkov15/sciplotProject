@@ -1,6 +1,5 @@
 #include "graphs.cpp"
 
-
 int main(int argc, char **argv) {
     int plot_type;
     do {
@@ -43,4 +42,5 @@ int main(int argc, char **argv) {
             histogramAverageDelay(res);
         }
     } while (plot_type != 0);
+    return 0;
 }
