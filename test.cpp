@@ -45,6 +45,9 @@ TEST_CASE("sortingDelays") {
     auto sorted = sortDelays(delays);
 
     CHECK(sorted_delays_equal(sorted, {{600, 1000, 2000}, {"b", "a", "c"}}));
+
+    CHECK_FALSE(sorted_delays_equal(sorted, {{1000, 600, 2000}, {"a", "b", "c"}}));
+    CHECK_FALSE(sorted_delays_equal(sorted, {{600, 1000, 2000}, {"a", "b", "c"}}));
 }
 
 
