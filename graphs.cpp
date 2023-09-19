@@ -16,9 +16,6 @@ const std::string FILEPATH_HISTOGRAM = "Histogram.pdf";
 
 const std::string FILEPATH_CURVE = "Curve.pdf";
 
-void foo();
-int sum(int a, int b) { return a + b;}
-
 /**
  * Функция, которая обрабатывает нажатия клавиш на клавиатуру и подсчитывает задержку в миллисекундах
  * перед нажатием каждой из клавиш. Символ окончания ввода: '.'
@@ -149,6 +146,12 @@ std::vector<long long> getDelaysSimple() {
 std::vector<double> averageDelays(const delays_dict &delays) {
     std::vector<double> res;
     for (const auto &item: delays) {
+        if (item.second.at("count") <= 0) {
+            throw std::runtime_error("Zero division error.");
+        }
+        if (item.second.at("delay") < 0) {
+            throw std::runtime_error("Delay can not be negative value");
+        }
         res.push_back(static_cast<double>(item.second.at("delay")) / static_cast<double>(item.second.at("count")));
     }
     return res;
@@ -173,6 +176,12 @@ sorted_delays_type sortDelays(const delays_dict &delays) {
 
     std::vector<std::pair<double, std::string>> pairs;
     for (const auto &item: delays) {
+        if (item.second.at("count") <= 0) {
+            throw std::runtime_error("Zero division error.");
+        }
+        if (item.second.at("delay") < 0) {
+            throw std::runtime_error("Delay can not be negative value");
+        }
         pairs.emplace_back(static_cast<double>(item.second.at("delay")) / static_cast<double>(item.second.at("count")),
                            item.first);
     }
@@ -224,6 +233,10 @@ void histogramAverageDelay(const delays_dict &delays) {
  */
 void plotDelays(const std::vector<long long>& delays)
 {
+    if (delays.size() == 0) {
+        throw std::runtime_error("delays can not be empty vector.");
+    }
+
     Plot2D plot; // Создаем объект Plot2D для построения 2D-графика
     plot.xlabel("Задержка (мс)"); // Устанавливаем подпись по оси x
     plot.ylabel("Доля нажатий"); // Устанавливаем подпись по оси y

@@ -1,4 +1,5 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+
 #include "doctest.h"
 #include "graphs.cpp"
 
@@ -20,7 +21,7 @@ inline bool fileExists(const std::string &filename) {
  * @param rhs пара 2
  * @return true, если lhs == rhs, иначе - false.
  */
-bool sorted_delays_equal(const sorted_delays_type& lhs, const sorted_delays_type& rhs) {
+bool sorted_delays_equal(const sorted_delays_type &lhs, const sorted_delays_type &rhs) {
     if (lhs.first.size() != rhs.first.size()) {
         return false;
     }
@@ -37,17 +38,20 @@ bool sorted_delays_equal(const sorted_delays_type& lhs, const sorted_delays_type
  */
 TEST_CASE("sortingDelays") {
     delays_dict delays = {
-            {"a", {{"count", 5}, {"delay", 5000},}},    // avg: 1000
-            {"b", {{"count", 3}, {"delay", 1800},}},    // avg: 600
+            {"a", {{"count", 5},  {"delay", 5000},}},    // avg: 1000
+            {"b", {{"count", 3},  {"delay", 1800},}},    // avg: 600
             {"c", {{"count", 10}, {"delay", 20000},}},  // avg: 2000
     };
 
     auto sorted = sortDelays(delays);
 
-    CHECK(sorted_delays_equal(sorted, {{600, 1000, 2000}, {"b", "a", "c"}}));
+    CHECK(sorted_delays_equal(sorted, {{600, 1000, 2000},
+                                       {"b", "a",  "c"}}));
 
-    CHECK_FALSE(sorted_delays_equal(sorted, {{1000, 600, 2000}, {"a", "b", "c"}}));
-    CHECK_FALSE(sorted_delays_equal(sorted, {{600, 1000, 2000}, {"a", "b", "c"}}));
+    CHECK_FALSE(sorted_delays_equal(sorted, {{1000, 600, 2000},
+                                             {"a",  "b", "c"}}));
+    CHECK_FALSE(sorted_delays_equal(sorted, {{600, 1000, 2000},
+                                             {"a", "b",  "c"}}));
 }
 
 
@@ -68,11 +72,11 @@ TEST_CASE("plotDelays") {
 TEST_CASE("plotHistograms")
 {
     delays_dict delays = {
-            {"a", {{"count", 5}, {"delay", 5000},}},    // avg: 1000
-            {"b", {{"count", 3}, {"delay", 1800},}},    // avg: 600
+            {"a", {{"count", 5},  {"delay", 5000},}},    // avg: 1000
+            {"b", {{"count", 3},  {"delay", 1800},}},    // avg: 600
             {"c", {{"count", 10}, {"delay", 20000},}},  // avg: 2000
-            {"d", {{"count", 6}, {"delay", 5600},}},  // avg: 933
-            {"e", {{"count", 8}, {"delay", 12460},}},  // avg: 1560
+            {"d", {{"count", 6},  {"delay", 5600},}},  // avg: 933
+            {"e", {{"count", 8},  {"delay", 12460},}},  // avg: 1560
     };
 
     histogramAverageDelay(delays);
@@ -87,14 +91,42 @@ TEST_CASE("plotHistograms")
 TEST_CASE("plotHistogramsPairs")
 {
     delays_dict delays = {
-            {"ab", {{"count", 5}, {"delay", 5000},}},    // avg: 1000
-            {"bd", {{"count", 3}, {"delay", 1800},}},    // avg: 600
+            {"ab", {{"count", 5},  {"delay", 5000},}},    // avg: 1000
+            {"bd", {{"count", 3},  {"delay", 1800},}},    // avg: 600
             {"ce", {{"count", 10}, {"delay", 20000},}},  // avg: 2000
-            {"dd", {{"count", 6}, {"delay", 5600},}},  // avg: 933
-            {"ec", {{"count", 8}, {"delay", 12460},}},  // avg: 1560
+            {"dd", {{"count", 6},  {"delay", 5600},}},  // avg: 933
+            {"ec", {{"count", 8},  {"delay", 12460},}},  // avg: 1560
     };
 
     histogramAverageDelay(delays);
 
     CHECK(fileExists(FILEPATH_HISTOGRAM));
+}
+
+
+/**
+ * Проверка выбрасываний исключений
+ */
+TEST_CASE("sortDelays and averageDelays exceptions") {
+    delays_dict delays = {
+            {"a", {{"count", 5},  {"delay", 5000},}},    // avg: 1000
+            {"b", {{"count", 0},  {"delay", 100},}},    // avg: ?
+            {"c", {{"count", 10}, {"delay", 20000},}},  // avg: 2000
+    };
+
+    SUBCASE("zeroDivision") {
+        CHECK_THROWS_AS(averageDelays(delays), std::runtime_error);
+        CHECK_THROWS_AS(sortDelays(delays), std::runtime_error);
+    }
+}
+
+/**
+ * Проверка выбрасываний исключений на построении графиков
+ */
+TEST_CASE("plotDelays Exceptions") {
+    std::vector<long long> delays = {};
+
+    SUBCASE("empty delay vector") {
+        CHECK_THROWS_AS(plotDelays(delays), std::runtime_error);
+    }
 }
